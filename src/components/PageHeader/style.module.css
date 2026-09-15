@@ -1,0 +1,15 @@
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 { margin: 0; font-size: 1.8rem; }
+.header p { margin: 0.4rem 0 0; color: var(--color-text-muted); }
+.actions { display: flex; gap: 0.5rem; }
+
+@media (max-width: 640px) {
+  .header { flex-direction: column; }
+}

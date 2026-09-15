@@ -1,0 +1,21 @@
+.shell { min-height: 100vh; }
+.topbar {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 2rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+.brand { color: var(--color-text); font-size: 1.15rem; font-weight: 800; text-decoration: none; }
+.nav { display: flex; gap: 1rem; }
+.nav a { color: var(--color-text-muted); text-decoration: none; }
+.nav a[aria-current="page"] { color: var(--color-primary); font-weight: 700; }
+.account { margin-left: auto; display: flex; align-items: center; gap: 1rem; color: var(--color-text-muted); font-size: 0.9rem; }
+.main { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
+
+@media (max-width: 760px) {
+  .topbar { align-items: flex-start; flex-wrap: wrap; gap: 0.75rem 1rem; padding: 1rem; }
+  .account { width: 100%; margin-left: 0; justify-content: space-between; }
+}

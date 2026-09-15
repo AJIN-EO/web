@@ -1,0 +1,8 @@
+.root { display: grid; gap: 1rem; }
+.item { border: 1px solid var(--color-border); border-radius: var(--radius); padding: 1rem; }
+.item legend { padding: 0 0.4rem; font-weight: 700; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem; }
+
+@media (max-width: 760px) {
+  .grid { grid-template-columns: 1fr; }
+}
