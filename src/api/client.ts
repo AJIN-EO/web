@@ -17,7 +17,12 @@ export class ApiError extends Error {
 type ApiRequestConfig = Omit<AxiosRequestConfig, "baseURL" | "data" | "method" | "url">;
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
-export const apiBaseUrl = configuredBaseUrl || "";
+
+if (!configuredBaseUrl) {
+  throw new Error("VITE_API_BASE_URL 환경변수가 설정되지 않았습니다.");
+}
+
+export const apiBaseUrl = configuredBaseUrl;
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,

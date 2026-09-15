@@ -9,15 +9,21 @@ npm install
 npm run dev
 ```
 
-브라우저는 `.env`에 지정한 HTTPS API 서버를 직접 호출합니다. 다른 API 서버를 사용할 때는 다음 값을 변경합니다.
+브라우저는 `.env`에 지정한 HTTPS API 서버를 직접 호출합니다. `.env.example`을 복사하고 실제 API 주소를 입력합니다.
 
-```text
-VITE_API_BASE_URL=https://api.example.com
+```bash
+cp .env.example .env
 ```
 
-API 서버는 프론트 Origin을 정확히 허용하고 `Access-Control-Allow-Credentials: true`를 반환해야 합니다. Axios는 모든 요청에 `withCredentials: true`를 적용합니다.
+```text
+VITE_API_BASE_URL=https://api.your-domain.com
+```
+
+`VITE_API_BASE_URL`은 필수이며 마지막 `/` 없이 입력하는 것을 권장합니다. API 서버는 프론트 Origin을 정확히 허용하고 `Access-Control-Allow-Credentials: true`를 반환해야 합니다. Axios는 모든 요청에 `withCredentials: true`를 적용합니다.
 
 운영 환경도 빌드 시 지정한 `VITE_API_BASE_URL`을 직접 호출합니다. API 서버에서 실제 프론트 Origin에 대한 credential CORS와 쿠키 설정을 맞춰야 합니다.
+
+> `VITE_`로 시작하는 값은 빌드 결과에 포함되어 브라우저에서 확인할 수 있습니다. API 주소처럼 공개되어도 되는 설정만 등록하고, 비밀번호·세션 시크릿·API 키는 프론트 환경변수에 넣지 마세요.
 
 ## 사용자 흐름
 
