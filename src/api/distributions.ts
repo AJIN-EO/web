@@ -5,13 +5,12 @@ export interface CreateEoItemInput {
   vehicle: string;
   eoNo: string;
   itemName: string;
-  issueDate: string | null;
-  requirement: string | null;
-  reason: string | null;
+  issueDate: string;
+  requirement: string;
+  reason: string;
 }
 
 export interface CreateDistributionInput {
-  companyId: number;
   title: string;
   message: string | null;
   items: CreateEoItemInput[];

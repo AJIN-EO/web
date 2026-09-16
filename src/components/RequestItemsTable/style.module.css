@@ -1,2 +1,3 @@
 .wrapper { overflow-x: auto; }
-.wrapper table { min-width: 760px; }
+.wrapper table { min-width: 940px; }
+.selected { background: var(--color-info-soft); }

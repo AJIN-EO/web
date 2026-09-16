@@ -1,42 +1,23 @@
-import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import EoItemsEditor, { createEmptyEoItem, type DraftEoItem } from "../../components/EoItemsEditor";
+import type { FormEvent } from "react";
+import { Link } from "react-router-dom";
+import EoItemsEditor from "../../components/EoItemsEditor";
 import PageHeader from "../../components/PageHeader";
 import StatusBadge from "../../components/StatusBadge";
+import { useCreateDistributionForm } from "../../hooks/useCreateDistributionForm";
 import { useSession } from "../../hooks/useSession";
-import { useAdminRequestsQuery, useCreateDistributionMutation } from "../../queries/adminDistributions";
-import { useCompaniesQuery } from "../../queries/companies";
+import { useAdminRequestsQuery } from "../../queries/adminDistributions";
 import { errorMessage, formatDateTime } from "../../utils/format";
 import styles from "../../styles/page.module.css";
 
 export default function AdminPage() {
-  const navigate = useNavigate();
   const { user } = useSession();
-  const enabled = user?.role === "admin" || user?.role === "staff";
-  const companiesQuery = useCompaniesQuery(enabled);
+  const enabled = user?.role === "admin";
   const requestsQuery = useAdminRequestsQuery(enabled);
-  const createMutation = useCreateDistributionMutation();
-  const [companyId, setCompanyId] = useState("");
-  const [title, setTitle] = useState("EO 데이터 다운로드");
-  const [message, setMessage] = useState("확인 후 다운로드 바랍니다.");
-  const [items, setItems] = useState<DraftEoItem[]>([createEmptyEoItem()]);
+  const form = useCreateDistributionForm();
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const { request } = await createMutation.mutateAsync({
-      companyId: Number(companyId),
-      title: title.trim(),
-      message: message.trim() || null,
-      items: items.map((item) => ({
-        vehicle: item.vehicle.trim(),
-        eoNo: item.eoNo.trim(),
-        itemName: item.itemName.trim(),
-        issueDate: item.issueDate || null,
-        requirement: item.requirement.trim() || null,
-        reason: item.reason.trim() || null,
-      })),
-    });
-    navigate(`/admin/requests/${request.id}`);
+    void form.submit();
   };
 
   return (
@@ -47,19 +28,12 @@ export default function AdminPage() {
         <h2>새 EO 배포</h2>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.formGrid}>
-            <label>받는 회사
-              <select value={companyId} onChange={(event) => setCompanyId(event.target.value)} required disabled={companiesQuery.isLoading || createMutation.isPending}>
-                <option value="">회사를 선택하세요</option>
-                {companiesQuery.data?.map((company) => <option key={company.id} value={company.id}>{company.code} · {company.name}</option>)}
-              </select>
-            </label>
-            <label>제목<input value={title} onChange={(event) => setTitle(event.target.value)} required disabled={createMutation.isPending} /></label>
-            <label className={styles.fullWidth}>안내 메시지<textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={3} disabled={createMutation.isPending} /></label>
+            <label>제목<input value={form.title} onChange={(event) => form.setTitle(event.target.value)} placeholder="배포 제목을 입력하세요" required disabled={form.isSubmitting} /></label>
+            <label className={styles.fullWidth}>안내 메시지<textarea value={form.message} onChange={(event) => form.setMessage(event.target.value)} placeholder="기업 담당자에게 전달할 안내 메시지를 입력하세요" rows={3} disabled={form.isSubmitting} /></label>
           </div>
-          {companiesQuery.error ? <p className="alert alert--error">회사 목록: {errorMessage(companiesQuery.error)}</p> : null}
-          <EoItemsEditor items={items} onChange={setItems} disabled={createMutation.isPending} />
-          {createMutation.error ? <p className="alert alert--error" role="alert">{errorMessage(createMutation.error)}</p> : null}
-          <div className={styles.actions}><button className="button button--primary" type="submit" disabled={createMutation.isPending || !companyId}>{createMutation.isPending ? "배포 생성 중..." : "배포 보내기"}</button></div>
+          <EoItemsEditor items={form.items} onChange={form.setItems} disabled={form.isSubmitting} />
+          {form.error ? <p className="alert alert--error" role="alert">{errorMessage(form.error)}</p> : null}
+          <div className={styles.actions}><button className="button button--primary" type="submit" disabled={!form.canSubmit}>{form.isSubmitting ? "배포 생성 중..." : "배포 보내기"}</button></div>
         </form>
       </section>
 
@@ -77,7 +51,7 @@ export default function AdminPage() {
               <tbody>
                 {requestsQuery.data.map((request) => (
                   <tr key={request.id}>
-                    <td>{request.company_code} · {request.company_name}</td><td>{request.title}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDateTime(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
+                    <td>{request.company_name}</td><td>{request.title}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDateTime(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
                   </tr>
                 ))}
                 {!requestsQuery.data.length ? <tr><td colSpan={8} className="empty-cell">보낸 배포가 없습니다.</td></tr> : null}

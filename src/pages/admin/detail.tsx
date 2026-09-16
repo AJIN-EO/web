@@ -1,7 +1,9 @@
 import { Link, useParams } from "react-router-dom";
+import EoDiscussionPanel from "../../components/EoDiscussionPanel";
 import PageHeader from "../../components/PageHeader";
 import RequestItemsTable from "../../components/RequestItemsTable";
 import StatusBadge from "../../components/StatusBadge";
+import { useRequestItemSelection } from "../../hooks/useRequestItemSelection";
 import { useAdminRequestQuery } from "../../queries/adminDistributions";
 import { errorMessage, formatDateTime } from "../../utils/format";
 import styles from "../../styles/page.module.css";
@@ -9,15 +11,17 @@ import styles from "../../styles/page.module.css";
 export default function AdminRequestDetailPage() {
   const { id } = useParams();
   const requestQuery = useAdminRequestQuery(id);
+  const itemSelection = useRequestItemSelection(requestQuery.data?.items);
 
   if (requestQuery.isLoading) return <p className="page-state">배포 상세를 불러오는 중...</p>;
   if (requestQuery.error) return <p className="alert alert--error">{errorMessage(requestQuery.error)}</p>;
   if (!requestQuery.data) return <p className="page-state">배포를 찾을 수 없습니다.</p>;
   const request = requestQuery.data;
+  const selectedItem = itemSelection.selectedItem;
 
   return (
     <div>
-      <PageHeader title={request.title} description={`${request.company_code} · 배포 #${request.id}`} actions={<Link className="button" to="/admin">목록으로</Link>} />
+      <PageHeader title={request.title} description={`${request.company_name} · 배포 #${request.id}`} actions={<Link className="button" to="/admin">목록으로</Link>} />
       <section className="panel">
         <div className={styles.sectionHeader}><h2>배포 정보</h2><StatusBadge status={request.package_status} /></div>
         <dl className={styles.detailGrid}>
@@ -29,7 +33,11 @@ export default function AdminRequestDetailPage() {
           {request.error_message ? <div className={styles.fullWidth}><dt>처리 오류</dt><dd className={styles.errorText}>{request.error_message}</dd></div> : null}
         </dl>
       </section>
-      <section className="panel"><h2>EO 항목 ({request.items.length})</h2><RequestItemsTable items={request.items} /></section>
+      <section className="panel">
+        <h2>EO 항목 및 처리 ({request.items.length})</h2>
+        <RequestItemsTable items={request.items} selectedItemId={selectedItem?.id} onOpenDiscussion={itemSelection.selectItem} />
+        {selectedItem ? <EoDiscussionPanel key={selectedItem.id} publicId={request.public_id} item={selectedItem} canResolve /> : null}
+      </section>
       <section className="panel">
         <h2>NAS 검색 결과 ({request.search_results.length})</h2>
         {request.search_results.length ? <ul className={styles.pathList}>{request.search_results.map((result) => <li key={result.id}><strong>{result.eo_no}</strong><code>{result.nas_path}</code></li>)}</ul> : <p className="page-state">아직 검색 결과가 없습니다.</p>}

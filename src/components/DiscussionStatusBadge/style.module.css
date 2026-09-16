@@ -1,0 +1,13 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.active { background: var(--color-warning-soft); color: var(--color-warning); }
+.modified { background: var(--color-success-soft); color: var(--color-success); }
+.not_required { background: #eef0f3; color: #475467; }

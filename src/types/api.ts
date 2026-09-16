@@ -1,7 +1,9 @@
 // Mirrors server/src/db.js. node-postgres returns bigserial values as strings,
 // while publicUser() converts session user IDs to numbers.
-export type UserRole = "admin" | "staff" | "company";
+export type UserRole = "admin" | "company";
 export type PackageStatus = "pending" | "processing" | "ready" | "failed";
+export type DiscussionStatus = "active" | "modified" | "not_required";
+export type DiscussionEventType = "comment" | "resolved" | "reopened";
 
 export interface SessionUser {
   id: number;
@@ -53,6 +55,53 @@ export interface EoItem {
   issue_date: string | null;
   requirement: string | null;
   reason: string | null;
+  discussion_status: DiscussionStatus;
+  discussion_version: number;
+  resolution_reason: string | null;
+  resolved_by_id: string | null;
+  resolved_at: string | null;
+  discussion_updated_at: string;
+}
+
+export interface Discussion {
+  item_id: string;
+  status: DiscussionStatus;
+  version: number;
+  resolution_reason: string | null;
+  resolved_by_id: string | null;
+  resolved_at: string | null;
+  updated_at: string;
+}
+
+export interface DiscussionEvent {
+  id: string;
+  eo_item_id: string;
+  version: number;
+  type: DiscussionEventType;
+  body: string | null;
+  actor_id: string;
+  actor_name: string;
+  actor_role: UserRole;
+  from_status: DiscussionStatus;
+  to_status: DiscussionStatus;
+  created_at: string;
+}
+
+export interface DiscussionPage {
+  discussion: Discussion;
+  events: DiscussionEvent[];
+  nextAfterVersion: number;
+  hasMore: boolean;
+}
+
+export interface DiscussionHistory {
+  discussion: Discussion;
+  events: DiscussionEvent[];
+}
+
+export interface DiscussionChangeResult {
+  discussion: Discussion;
+  event: DiscussionEvent;
 }
 
 export interface SearchResult {

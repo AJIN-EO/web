@@ -1,16 +1,23 @@
 import { Link } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import StatusBadge from "../../components/StatusBadge";
+import { useSession } from "../../hooks/useSession";
 import { useCompanyRequestsQuery } from "../../queries/companyDistributions";
 import { errorMessage, formatDateTime } from "../../utils/format";
 import styles from "../../styles/page.module.css";
 
 export default function CompanyPage() {
+  const { user } = useSession();
+  const isAdmin = user?.role === "admin";
   const requestsQuery = useCompanyRequestsQuery();
 
   return (
     <div>
-      <PageHeader title="받은 EO 배포" description="내 회사로 전달된 EO 배포를 확인하고 준비된 파일을 다운로드합니다." actions={<button className="button" type="button" onClick={() => requestsQuery.refetch()} disabled={requestsQuery.isFetching}>새로고침</button>} />
+      <PageHeader
+        title={isAdmin ? "보낸 EO 배포" : "받은 EO 배포"}
+        description={isAdmin ? "기업 사용자에게 보낸 EO 배포를 확인합니다." : "내 회사로 전달된 EO 배포를 확인하고 준비된 파일을 다운로드합니다."}
+        actions={<button className="button" type="button" onClick={() => requestsQuery.refetch()} disabled={requestsQuery.isFetching}>새로고침</button>}
+      />
       <section className="panel">
         <div className={styles.sectionHeader}><h2>배포 목록</h2><span>{requestsQuery.data?.length ?? 0}건</span></div>
         {requestsQuery.isLoading ? <p className="page-state">목록을 불러오는 중...</p> : null}

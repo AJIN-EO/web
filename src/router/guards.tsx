@@ -26,5 +26,5 @@ export function RequireRole({ roles, children }: { roles: UserRole[]; children: 
 
 export function LandingRedirect() {
   const { user } = useSession();
-  return <Navigate to={user?.role === "admin" || user?.role === "staff" ? "/admin" : "/company"} replace />;
+  return <Navigate to={user?.role === "admin" ? "/admin" : "/company"} replace />;
 }
