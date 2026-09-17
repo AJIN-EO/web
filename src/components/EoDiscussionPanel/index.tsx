@@ -53,21 +53,16 @@ export default function EoDiscussionPanel({ publicId, itemId, canResolve }: Prop
 
   return (
     <div className={styles.panel}>
-      <div className={styles.toolbar}>
-          <span className={styles.version}>버전 {discussion.version}</span>
-          <button className="button" type="button" onClick={() => controller.refresh()} disabled={controller.isRefreshing || controller.isMutating}>
-            {controller.isRefreshing ? "새로고침 중..." : "이력 새로고침"}
-          </button>
-      </div>
-
       {discussion.status !== "active" ? (
         <div className={styles.resolution}>
           <strong>{statusLabels[discussion.status]}</strong>
           {discussion.resolution_reason ? <p>{discussion.resolution_reason}</p> : null}
           <p>{formatDateTime(discussion.resolved_at)}에 확정되었습니다.</p>
-          <button className="button" type="button" onClick={handleReopen} disabled={controller.isMutating}>
-            {reopen.isSubmitting ? "재활성화 중..." : "다시 활성화"}
-          </button>
+          {canResolve ? (
+            <button className="button" type="button" onClick={handleReopen} disabled={controller.isMutating}>
+              {reopen.isSubmitting ? "재활성화 중..." : "다시 활성화"}
+            </button>
+          ) : null}
         </div>
       ) : null}
 

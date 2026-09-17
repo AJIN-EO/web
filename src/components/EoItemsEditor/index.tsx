@@ -26,7 +26,7 @@ export default function EoItemsEditor({ items, onChange, disabled }: EoItemsEdit
           <legend>EO 항목 {index + 1}</legend>
           <div className={styles.grid}>
             <label><span>차종<RequiredMark /></span><input value={item.vehicle} onChange={(event) => update(index, "vehicle", event.target.value)} placeholder="NAS 차종 폴더와 동일하게 입력하세요" maxLength={255} required /></label>
-            <label><span>EO No.<RequiredMark /></span><input value={item.eoNo} onChange={(event) => update(index, "eoNo", event.target.value)} placeholder="EO No.를 입력하세요" maxLength={255} required /></label>
+            <label><span>EO 번호<RequiredMark /></span><input value={item.eoNo} onChange={(event) => update(index, "eoNo", event.target.value)} placeholder="EO 번호를 입력하세요" maxLength={255} required /></label>
             <label><span>품목<RequiredMark /></span><input value={item.itemName} onChange={(event) => update(index, "itemName", event.target.value)} placeholder="품목을 입력하세요" maxLength={5000} required /></label>
             <label><span>발행일자<RequiredMark /></span><input type="datetime-local" value={item.issueDate} onChange={(event) => update(index, "issueDate", event.target.value)} step={1} required /></label>
             <label><span>적용요구시점</span><input value={item.requirement} onChange={(event) => update(index, "requirement", event.target.value)} placeholder="적용요구시점을 입력하세요" maxLength={5000} /></label>

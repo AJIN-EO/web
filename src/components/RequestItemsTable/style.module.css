@@ -1,9 +1,12 @@
 .wrapper { overflow-x: auto; }
 .wrapper table { min-width: 940px; }
+.wrapper th,
+.wrapper td { border-bottom: 0; }
+.dataRow > td { border-top: 1px solid var(--color-border); }
 .expandable { cursor: pointer; }
 .expandable:hover,
-.expandable:focus-visible,
-.expanded { background: var(--color-info-soft); }
+.expandable:focus-visible { background: var(--color-info-soft); }
+.expanded { background: #fff; }
 .expandable:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
-.expandedRow { background: #f9fafb; }
-.expandedCell { padding: 0; }
+.expandedRow { background: #fff; }
+.expandedRow > .expandedCell { border-top: 0; padding: 0; }

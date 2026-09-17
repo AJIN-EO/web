@@ -32,7 +32,7 @@ export default function AdminPage() {
             <label><span>제목</span><input value={form.title} onChange={(event) => form.setTitle(event.target.value)} placeholder={DEFAULT_DISTRIBUTION_TITLE} maxLength={500} disabled={form.isSubmitting} /></label>
             <label className={styles.fullWidth}><span>메일 본문 내용</span><textarea value={form.message} onChange={(event) => form.setMessage(event.target.value)} placeholder={DEFAULT_DISTRIBUTION_MESSAGE} maxLength={10000} rows={3} disabled={form.isSubmitting} /></label>
           </div>
-          <p className="alert alert--info">차종과 EO No.를 기준으로 NAS에서 수신 기업을 찾습니다. 검색 중에는 시간이 걸릴 수 있으므로 배포 버튼을 다시 누르지 마세요.</p>
+          <p className="alert alert--info">차종과 EO 번호를 기준으로 NAS에서 수신 기업을 찾습니다. 검색 중에는 시간이 걸릴 수 있으므로 배포 버튼을 다시 누르지 마세요.</p>
           <EoItemsEditor items={form.items} onChange={form.setItems} disabled={form.isSubmitting} />
           {form.error ? <p className="alert alert--error" role="alert">{errorMessage(form.error)}</p> : null}
           {form.routingIssues.length ? (
@@ -77,9 +77,9 @@ export default function AdminPage() {
             <table>
               <thead><tr><th>회사</th><th>제목</th><th>상태</th><th>EO 수</th><th>방문</th><th>다운로드</th><th>생성일</th><th></th></tr></thead>
               <tbody>
-                {requestsQuery.data.map((request) => (
+                {requestsQuery.data.slice(0, 5).map((request) => (
                   <tr key={request.id}>
-                    <td>{request.company_name}</td><td>{request.title}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDistributionListDate(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
+                    <td className={styles.truncateCell}><span title={request.company_name}>{request.company_name}</span></td><td className={styles.truncateCell}><span title={request.title}>{request.title}</span></td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDistributionListDate(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
                   </tr>
                 ))}
                 {!requestsQuery.data.length ? <tr><td colSpan={8} className="empty-cell">보낸 배포가 없습니다.</td></tr> : null}
@@ -87,6 +87,7 @@ export default function AdminPage() {
             </table>
           </div>
         ) : null}
+        {requestsQuery.data?.length ? <div className={styles.listFooter}><Link className="button" to="/company">더보기</Link></div> : null}
       </section>
     </div>
   );

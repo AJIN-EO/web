@@ -37,7 +37,7 @@ th, td { border-bottom: 1px solid var(--color-border); padding: 0.75rem; text-al
 th { color: var(--color-text-muted); font-size: 0.8rem; white-space: nowrap; }
 code { word-break: break-all; }
 
-.button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; border: 1px solid var(--color-border); border-radius: 7px; padding: 0.45rem 0.8rem; background: #fff; color: var(--color-text); cursor: pointer; text-decoration: none; font-weight: 650; }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; border: 1px solid var(--color-border); border-radius: 7px; padding: 0.45rem 0.8rem; background: #fff; color: var(--color-text); cursor: pointer; text-decoration: none; font-weight: 500; }
 .button:hover:not(:disabled) { background: #f2f4f7; }
 .button--primary { border-color: var(--color-primary); background: var(--color-primary); color: #fff; }
 .button--primary:hover:not(:disabled) { background: var(--color-primary-hover); }

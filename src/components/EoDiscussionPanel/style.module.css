@@ -1,9 +1,8 @@
 .panel {
-  padding: 1rem;
-  background: #f9fafb;
+  padding: 1rem 0.75rem 1.25rem;
+  background: #fff;
 }
 
-.toolbar,
 .formFooter,
 .eventMeta {
   display: flex;
@@ -11,11 +10,8 @@
   gap: 0.75rem;
 }
 
-.toolbar { justify-content: flex-end; }
-.version { color: var(--color-text-muted); font-size: 0.8rem; }
-
 .resolution {
-  margin-top: 1rem;
+  margin-top: 0;
   border-left: 4px solid var(--color-success);
   padding: 0.8rem 1rem;
   background: var(--color-success-soft);
@@ -24,6 +20,7 @@
 .resolution p { margin: 0.4rem 0; white-space: pre-wrap; }
 .resolution button { margin-top: 0.35rem; }
 .history { margin-top: 1.25rem; }
+.panel > .history:first-child { margin-top: 0; }
 .history h4, .form h4 { margin: 0 0 0.8rem; }
 .empty { color: var(--color-text-muted); }
 
@@ -52,6 +49,5 @@
 .formFooter span { color: var(--color-text-muted); font-size: 0.8rem; }
 
 @media (max-width: 700px) {
-  .toolbar { justify-content: flex-start; }
   .eventMeta time { width: 100%; margin-left: 0; }
 }

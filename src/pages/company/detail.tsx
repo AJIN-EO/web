@@ -5,12 +5,14 @@ import RequestItemsTable from "../../components/RequestItemsTable";
 import StatusBadge from "../../components/StatusBadge";
 import { useDistributionDownload } from "../../hooks/useDistributionDownload";
 import { useRequestItemSelection } from "../../hooks/useRequestItemSelection";
+import { useSession } from "../../hooks/useSession";
 import { useCompanyRequestQuery } from "../../queries/companyDistributions";
 import { errorMessage, formatDateTime } from "../../utils/format";
 import styles from "../../styles/page.module.css";
 
 export default function CompanyRequestDetailPage() {
   const { publicId = "" } = useParams();
+  const { user } = useSession();
   const requestQuery = useCompanyRequestQuery(publicId || undefined);
   const itemSelection = useRequestItemSelection(requestQuery.data?.items);
   const download = useDistributionDownload(publicId, requestQuery.data?.package_status);
@@ -35,7 +37,7 @@ export default function CompanyRequestDetailPage() {
           items={request.items}
           expandedItemId={itemSelection.expandedItemId}
           onToggleItem={itemSelection.toggleItem}
-          renderExpandedRow={(item) => <EoDiscussionPanel publicId={request.public_id} itemId={item.id} canResolve={false} />}
+          renderExpandedRow={(item) => <EoDiscussionPanel publicId={request.public_id} itemId={item.id} canResolve={user?.role === "admin"} />}
         />
       </section>
       <section className={styles.downloadPanel}>
