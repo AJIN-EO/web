@@ -17,7 +17,6 @@ export default function AdminRequestDetailPage() {
   if (requestQuery.error) return <p className="alert alert--error">{errorMessage(requestQuery.error)}</p>;
   if (!requestQuery.data) return <p className="page-state">배포를 찾을 수 없습니다.</p>;
   const request = requestQuery.data;
-  const selectedItem = itemSelection.selectedItem;
 
   return (
     <div>
@@ -29,14 +28,18 @@ export default function AdminRequestDetailPage() {
           <div><dt>파일명</dt><dd>{request.package_filename ?? "-"}</dd></div>
           <div><dt>메일 발송</dt><dd>{formatDateTime(request.notified_at)}</dd></div>
           <div><dt>생성일</dt><dd>{formatDateTime(request.created_at)}</dd></div>
-          <div className={styles.fullWidth}><dt>메시지</dt><dd>{request.message ?? "-"}</dd></div>
+          <div className={styles.fullWidth}><dt>메일 본문 내용</dt><dd>{request.message ?? "-"}</dd></div>
           {request.error_message ? <div className={styles.fullWidth}><dt>처리 오류</dt><dd className={styles.errorText}>{request.error_message}</dd></div> : null}
         </dl>
       </section>
       <section className="panel">
         <h2>EO 항목 및 처리 ({request.items.length})</h2>
-        <RequestItemsTable items={request.items} selectedItemId={selectedItem?.id} onOpenDiscussion={itemSelection.selectItem} />
-        {selectedItem ? <EoDiscussionPanel key={selectedItem.id} publicId={request.public_id} item={selectedItem} canResolve /> : null}
+        <RequestItemsTable
+          items={request.items}
+          expandedItemId={itemSelection.expandedItemId}
+          onToggleItem={itemSelection.toggleItem}
+          renderExpandedRow={(item) => <EoDiscussionPanel publicId={request.public_id} itemId={item.id} canResolve />}
+        />
       </section>
       <section className="panel">
         <h2>NAS 검색 결과 ({request.search_results.length})</h2>

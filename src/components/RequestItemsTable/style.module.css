@@ -1,3 +1,9 @@
 .wrapper { overflow-x: auto; }
 .wrapper table { min-width: 940px; }
-.selected { background: var(--color-info-soft); }
+.expandable { cursor: pointer; }
+.expandable:hover,
+.expandable:focus-visible,
+.expanded { background: var(--color-info-soft); }
+.expandable:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+.expandedRow { background: #f9fafb; }
+.expandedCell { padding: 0; }

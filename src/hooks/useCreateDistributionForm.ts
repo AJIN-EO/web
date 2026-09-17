@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ApiError } from "../api/client";
+import type { DistributionRoutingIssue } from "../api/distributions";
 import { useCreateDistributionMutation } from "../queries/adminDistributions";
 import {
   createEmptyEoItem,
@@ -9,7 +10,6 @@ import {
 } from "../utils/distributionForm";
 
 export function useCreateDistributionForm() {
-  const navigate = useNavigate();
   const createMutation = useCreateDistributionMutation();
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
@@ -19,8 +19,10 @@ export function useCreateDistributionForm() {
   const submit = async () => {
     if (!isDistributionFormValid(values) || createMutation.isPending) return;
     try {
-      const { request } = await createMutation.mutateAsync(toCreateDistributionInput(values));
-      navigate(`/admin/requests/${request.id}`);
+      await createMutation.mutateAsync(toCreateDistributionInput(values));
+      setTitle("");
+      setMessage("");
+      setItems([createEmptyEoItem()]);
     } catch {
       // The mutation exposes the server error to the form.
     }
@@ -37,5 +39,23 @@ export function useCreateDistributionForm() {
     canSubmit: isDistributionFormValid(values) && !createMutation.isPending,
     isSubmitting: createMutation.isPending,
     error: createMutation.error,
+    routingIssues: getRoutingIssues(createMutation.error),
+    distributions: createMutation.data?.distributions ?? [],
+    dismissResult: createMutation.reset,
   };
+}
+
+function getRoutingIssues(error: unknown): DistributionRoutingIssue[] {
+  if (!(error instanceof ApiError) || error.status !== 422) return [];
+  if (!error.data || typeof error.data !== "object" || !("issues" in error.data)) return [];
+  const issues = (error.data as { issues: unknown }).issues;
+  if (!Array.isArray(issues)) return [];
+  return issues.filter((issue): issue is DistributionRoutingIssue =>
+    Boolean(issue)
+    && typeof issue === "object"
+    && typeof (issue as DistributionRoutingIssue).itemIndex === "number"
+    && typeof (issue as DistributionRoutingIssue).vehicle === "string"
+    && typeof (issue as DistributionRoutingIssue).eoNo === "string"
+    && typeof (issue as DistributionRoutingIssue).code === "string"
+    && typeof (issue as DistributionRoutingIssue).message === "string");
 }

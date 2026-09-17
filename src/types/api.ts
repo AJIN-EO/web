@@ -53,8 +53,12 @@ export interface EoItem {
   eo_no: string;
   item_name: string;
   issue_date: string | null;
+  issued_at: string | null;
+  issue_date_precision: "date" | "datetime" | null;
   requirement: string | null;
   reason: string | null;
+  nas_search_root: string | null;
+  nas_matches: Array<{ name: string; path: string; isDir: boolean }> | null;
   discussion_status: DiscussionStatus;
   discussion_version: number;
   resolution_reason: string | null;

@@ -1,13 +1,13 @@
 import type { FormEvent } from "react";
 import { useEoDiscussion, type ResolutionStatus } from "../../hooks/useEoDiscussion";
-import type { DiscussionEvent, DiscussionStatus, EoItem } from "../../types/api";
+import type { DiscussionEvent, DiscussionStatus } from "../../types/api";
 import { errorMessage, formatDateTime } from "../../utils/format";
-import DiscussionStatusBadge from "../DiscussionStatusBadge";
+import RequiredMark from "../RequiredMark";
 import styles from "./style.module.css";
 
 interface Props {
   publicId: string;
-  item: EoItem;
+  itemId: string;
   canResolve: boolean;
 }
 
@@ -23,8 +23,8 @@ const statusLabels: Record<DiscussionStatus, string> = {
   not_required: "수정 불필요",
 };
 
-export default function EoDiscussionPanel({ publicId, item, canResolve }: Props) {
-  const controller = useEoDiscussion({ publicId, itemId: item.id });
+export default function EoDiscussionPanel({ publicId, itemId, canResolve }: Props) {
+  const controller = useEoDiscussion({ publicId, itemId });
 
   if (controller.isLoading) {
     return <div className={styles.panel}><p className="page-state">의견 이력을 불러오는 중...</p></div>;
@@ -53,18 +53,11 @@ export default function EoDiscussionPanel({ publicId, item, canResolve }: Props)
 
   return (
     <div className={styles.panel}>
-      <div className={styles.header}>
-        <div>
-          <p className={styles.eyebrow}>선택한 EO</p>
-          <h3>{item.eo_no} · {item.item_name}</h3>
-        </div>
-        <div className={styles.headerActions}>
-          <DiscussionStatusBadge status={discussion.status} />
+      <div className={styles.toolbar}>
           <span className={styles.version}>버전 {discussion.version}</span>
           <button className="button" type="button" onClick={() => controller.refresh()} disabled={controller.isRefreshing || controller.isMutating}>
             {controller.isRefreshing ? "새로고침 중..." : "이력 새로고침"}
           </button>
-        </div>
       </div>
 
       {discussion.status !== "active" ? (
@@ -88,7 +81,7 @@ export default function EoDiscussionPanel({ publicId, item, canResolve }: Props)
       {discussion.status === "active" ? (
         <form className={styles.form} onSubmit={handleComment}>
           <label>
-            의견 작성
+            <span>의견 작성<RequiredMark /></span>
             <textarea
               value={comment.value}
               onChange={(event) => comment.setValue(event.target.value)}
@@ -114,14 +107,14 @@ export default function EoDiscussionPanel({ publicId, item, canResolve }: Props)
             <p className={styles.formDescription}>관리자만 활성 EO의 최종 처리 결과를 확정할 수 있습니다.</p>
           </div>
           <label>
-            처리 결과
+            <span>처리 결과<RequiredMark /></span>
             <select value={resolution.status} onChange={(event) => resolution.setStatus(event.target.value as ResolutionStatus)}>
               <option value="modified">수정 완료</option>
               <option value="not_required">수정 불필요</option>
             </select>
           </label>
           <label>
-            처리 사유 {resolution.reasonRequired ? "(필수)" : "(선택)"}
+            <span>처리 사유{resolution.reasonRequired ? <RequiredMark /> : null}</span>
             <textarea
               value={resolution.reason}
               onChange={(event) => resolution.setReason(event.target.value)}
