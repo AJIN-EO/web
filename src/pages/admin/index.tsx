@@ -6,7 +6,7 @@ import StatusBadge from "../../components/StatusBadge";
 import { useCreateDistributionForm } from "../../hooks/useCreateDistributionForm";
 import { useSession } from "../../hooks/useSession";
 import { useAdminRequestsQuery } from "../../queries/adminDistributions";
-import { errorMessage, formatDateTime } from "../../utils/format";
+import { errorMessage, formatDistributionListDate } from "../../utils/format";
 import { DEFAULT_DISTRIBUTION_MESSAGE, DEFAULT_DISTRIBUTION_TITLE } from "../../utils/distributionForm";
 import styles from "../../styles/page.module.css";
 
@@ -79,7 +79,7 @@ export default function AdminPage() {
               <tbody>
                 {requestsQuery.data.map((request) => (
                   <tr key={request.id}>
-                    <td>{request.company_name}</td><td>{request.title}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDateTime(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
+                    <td>{request.company_name}</td><td>{request.title}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{request.visit_count ?? 0}</td><td>{request.download_count ?? 0}</td><td>{formatDistributionListDate(request.created_at)}</td><td><Link to={`/admin/requests/${request.id}`}>상세</Link></td>
                   </tr>
                 ))}
                 {!requestsQuery.data.length ? <tr><td colSpan={8} className="empty-cell">보낸 배포가 없습니다.</td></tr> : null}

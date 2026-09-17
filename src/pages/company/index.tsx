@@ -3,7 +3,7 @@ import PageHeader from "../../components/PageHeader";
 import StatusBadge from "../../components/StatusBadge";
 import { useSession } from "../../hooks/useSession";
 import { useCompanyRequestsQuery } from "../../queries/companyDistributions";
-import { errorMessage, formatDateTime } from "../../utils/format";
+import { errorMessage, formatDistributionListDate } from "../../utils/format";
 import styles from "../../styles/page.module.css";
 
 export default function CompanyPage() {
@@ -29,7 +29,7 @@ export default function CompanyPage() {
               <tbody>
                 {requestsQuery.data.map((request) => (
                   <tr key={request.public_id}>
-                    <td>{request.title}</td><td>{request.company_name}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{formatDateTime(request.created_at)}</td><td><Link to={`/company/requests/${request.public_id}`}>열기</Link></td>
+                    <td>{request.title}</td><td>{request.company_name}</td><td><StatusBadge status={request.package_status} /></td><td>{request.item_count}</td><td>{formatDistributionListDate(request.created_at)}</td><td><Link to={`/company/requests/${request.public_id}`}>열기</Link></td>
                   </tr>
                 ))}
                 {!requestsQuery.data.length ? <tr><td colSpan={6} className="empty-cell">받은 EO 배포가 없습니다.</td></tr> : null}
