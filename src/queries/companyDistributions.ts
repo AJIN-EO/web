@@ -37,3 +37,14 @@ export function useDownloadDistributionMutation(publicId: string) {
     mutationFn: () => createDownloadUrl(publicId),
   });
 }
+
+export function useCompanyPackageStatusQuery(publicId: string) {
+  return useQuery({
+    queryKey: queryKeys.companyPackageStatus(publicId),
+    queryFn: async () => (await getCompanyRequests()).requests.find((request) => request.public_id === publicId) ?? null,
+    // Explicit status refresh uses the list API so it does not add another visit.
+    enabled: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+}

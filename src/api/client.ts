@@ -68,6 +68,14 @@ export const http = {
   post<T, TBody = unknown>(path: string, body?: TBody, config?: ApiRequestConfig) {
     return apiClient.post<T, T, TBody>(path, body, config);
   },
+
+  delete<T = void, TBody = unknown>(path: string, body?: TBody, config?: ApiRequestConfig) {
+    return apiClient.delete<T, T>(path, { ...config, ...(body === undefined ? {} : { data: body }) });
+  },
+
+  patch<T, TBody = unknown>(path: string, body: TBody, config?: ApiRequestConfig) {
+    return apiClient.patch<T, T, TBody>(path, body, config);
+  },
 };
 
 export function getApiErrorStatus(error: unknown) {

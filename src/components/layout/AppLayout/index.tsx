@@ -17,8 +17,8 @@ export default function AppLayout() {
       <header className={styles.topbar}>
         <NavLink className={styles.brand} to="/">EO Portal</NavLink>
         <nav className={styles.nav} aria-label="주 메뉴">
-          {isAdmin ? <NavLink to="/admin">배포 관리</NavLink> : null}
-          <NavLink to="/company">{isAdmin ? "보낸 EO" : "받은 EO"}</NavLink>
+          {isAdmin ? <><NavLink to="/admin" end>배포 관리</NavLink><NavLink to="/admin/vehicles">차종 설정</NavLink></> : null}
+          <NavLink to={isAdmin ? "/admin/requests" : "/company"}>{isAdmin ? "보낸 EO" : "받은 EO"}</NavLink>
         </nav>
         <div className={styles.account}>
           <span><strong>{user?.displayName}</strong> · {user?.email}</span>

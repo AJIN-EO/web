@@ -9,6 +9,7 @@ interface Props {
   publicId: string;
   itemId: string;
   canResolve: boolean;
+  canReopen: boolean;
 }
 
 const eventLabels: Record<DiscussionEvent["type"], string> = {
@@ -23,7 +24,7 @@ const statusLabels: Record<DiscussionStatus, string> = {
   not_required: "수정 불필요",
 };
 
-export default function EoDiscussionPanel({ publicId, itemId, canResolve }: Props) {
+export default function EoDiscussionPanel({ publicId, itemId, canResolve, canReopen }: Props) {
   const controller = useEoDiscussion({ publicId, itemId });
 
   if (controller.isLoading) {
@@ -58,8 +59,8 @@ export default function EoDiscussionPanel({ publicId, itemId, canResolve }: Prop
           <strong>{statusLabels[discussion.status]}</strong>
           {discussion.resolution_reason ? <p>{discussion.resolution_reason}</p> : null}
           <p>{formatDateTime(discussion.resolved_at)}에 확정되었습니다.</p>
-          {canResolve ? (
-            <button className="button" type="button" onClick={handleReopen} disabled={controller.isMutating}>
+          {canReopen ? (
+            <button className="button" type="button" onClick={handleReopen} disabled={controller.isMutating || controller.isRefreshing}>
               {reopen.isSubmitting ? "재활성화 중..." : "다시 활성화"}
             </button>
           ) : null}

@@ -2,7 +2,7 @@ import { http } from "./client";
 import type { DistributionRequest, RequestDetail, RequestSummary } from "../types/api";
 
 export interface CreateEoItemInput {
-  vehicle: string;
+  vehicles: string[];
   eoNo: string;
   itemName: string;
   issueDate: string;
@@ -33,19 +33,25 @@ export interface RoutedDistribution {
     name: string;
   };
   itemIndices: number[];
+  vehicle: string;
+  itemRefs: Array<{ itemIndex: number; vehicleIndex: number; vehicle: string }>;
   request: DistributionRequest;
   notification: DistributionNotification;
 }
 
 export interface CreateDistributionResponse {
   distributions: RoutedDistribution[];
+  warnings: unknown[];
 }
 
 export interface DistributionRoutingIssue {
   itemIndex: number;
+  vehicleIndex: number;
   vehicle: string;
   eoNo: string;
-  code: "EO_NOT_FOUND" | "COMPANY_NOT_FOUND" | "AMBIGUOUS_COMPANY";
+  code: "EO_NOT_FOUND" | "COMPANY_NOT_FOUND" | "AMBIGUOUS_COMPANY"
+    | "VEHICLE_COMPANY_NOT_CONFIGURED" | "VEHICLE_NOT_FOUND"
+    | "PART_PATH_INVALID" | (string & {});
   message: string;
 }
 

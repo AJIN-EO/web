@@ -83,9 +83,9 @@ function useDiscussionMutation<TInput>(
       }));
       updateRequestItemCache(queryClient, publicId, itemId, result.discussion);
     },
-    onError: (error) => {
+    onError: async (error) => {
       if (getApiErrorStatus(error) === 409) {
-        void queryClient.refetchQueries({ queryKey: discussionKey, type: "active" });
+        await queryClient.refetchQueries({ queryKey: discussionKey, type: "active" });
       }
     },
   });
@@ -98,7 +98,7 @@ function updateRequestItemCache(
   discussion: Discussion,
 ) {
   const update = (request: RequestDetail | undefined) => {
-    if (!request) return request;
+    if (!request || request.public_id !== publicId) return request;
     return {
       ...request,
       items: request.items.map((item) => item.id === itemId ? {

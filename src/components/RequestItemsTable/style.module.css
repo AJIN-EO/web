@@ -1,4 +1,5 @@
 .wrapper { overflow-x: auto; }
+.inputVehicle { display: block; margin-top: 0.25rem; color: var(--color-text-muted); }
 .wrapper table { min-width: 940px; }
 .wrapper th,
 .wrapper td { border-bottom: 0; }

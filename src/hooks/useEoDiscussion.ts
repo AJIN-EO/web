@@ -26,6 +26,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
   const discussion = discussionQuery.data?.discussion;
   const mutationError = commentMutation.error ?? resolveMutation.error ?? reopenMutation.error;
   const isMutating = commentMutation.isPending || resolveMutation.isPending || reopenMutation.isPending;
+  const isBusy = isMutating || discussionQuery.isFetching || discussionQuery.isError;
 
   const resetMutationErrors = () => {
     commentMutation.reset();
@@ -35,7 +36,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
 
   const submitComment = async () => {
     const body = comment.trim();
-    if (!discussion || !body) return;
+    if (!discussion || isBusy || discussion.status !== "active" || !body) return;
     resetMutationErrors();
     try {
       await commentMutation.mutateAsync({ expectedVersion: discussion.version, body });
@@ -47,7 +48,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
 
   const submitResolution = async () => {
     const reason = resolutionReason.trim();
-    if (!discussion || (resolutionStatus === "not_required" && !reason)) return;
+    if (!discussion || isBusy || discussion.status !== "active" || (resolutionStatus === "not_required" && !reason)) return;
     resetMutationErrors();
     try {
       await resolveMutation.mutateAsync({
@@ -62,7 +63,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
   };
 
   const reopen = async () => {
-    if (!discussion) return;
+    if (!discussion || isBusy || discussion.status === "active") return;
     resetMutationErrors();
     try {
       await reopenMutation.mutateAsync({ expectedVersion: discussion.version });
@@ -84,7 +85,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
     comment: {
       value: comment,
       setValue: setComment,
-      canSubmit: Boolean(comment.trim()) && !isMutating,
+      canSubmit: Boolean(comment.trim()) && !isBusy,
       isSubmitting: commentMutation.isPending,
       submit: submitComment,
     },
@@ -94,7 +95,7 @@ export function useEoDiscussion({ publicId, itemId }: UseEoDiscussionOptions) {
       reason: resolutionReason,
       setReason: setResolutionReason,
       reasonRequired: resolutionStatus === "not_required",
-      canSubmit: !isMutating && (resolutionStatus !== "not_required" || Boolean(resolutionReason.trim())),
+      canSubmit: !isBusy && (resolutionStatus !== "not_required" || Boolean(resolutionReason.trim())),
       isSubmitting: resolveMutation.isPending,
       submit: submitResolution,
     },

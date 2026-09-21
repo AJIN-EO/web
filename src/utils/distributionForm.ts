@@ -5,7 +5,7 @@ export const DEFAULT_DISTRIBUTION_MESSAGE = "EO가 발생하여 안내드립니�
 
 export interface DraftEoItem {
   key: string;
-  vehicle: string;
+  vehicles: string[];
   eoNo: string;
   itemName: string;
   issueDate: string;
@@ -21,7 +21,7 @@ export interface DistributionFormValues {
 
 export const createEmptyEoItem = (): DraftEoItem => ({
   key: crypto.randomUUID(),
-  vehicle: "",
+  vehicles: [""],
   eoNo: "",
   itemName: "",
   issueDate: "",
@@ -36,7 +36,7 @@ export function toCreateDistributionInput(values: DistributionFormValues): Creat
     title,
     message,
     items: values.items.map((item) => ({
-      vehicle: item.vehicle.trim(),
+      vehicles: item.vehicles.map(normalizeVehicleName),
       eoNo: item.eoNo.trim(),
       itemName: item.itemName.trim(),
       issueDate: new Date(item.issueDate).toISOString(),
@@ -49,21 +49,36 @@ export function toCreateDistributionInput(values: DistributionFormValues): Creat
 export function isDistributionFormValid(values: DistributionFormValues) {
   return Boolean(
     values.title.length <= 500
+    && !values.title.includes("\0")
     && values.message.length <= 10_000
+    && !values.message.includes("\0")
     && values.items.length >= 1
     && values.items.length <= 100
+    && countEoVehiclePairs(values.items) <= 100
     && values.items.every((item) =>
-      item.vehicle.trim()
-      && item.vehicle.length <= 255
-      && !/[\/\\\u0000-\u001f]/.test(item.vehicle)
-      && item.eoNo.trim()
-      && item.eoNo.length <= 255
-      && !/[\/\\\u0000-\u001f]/.test(item.eoNo)
+      item.vehicles.length >= 1
+      && item.vehicles.length <= 100
+      && item.vehicles.every(isValidVehicleName)
+      && !hasDuplicateVehicles(item.vehicles)
+      && isValidVehicleName(item.eoNo)
       && item.itemName.trim()
       && item.itemName.length <= 5000
+      && !item.itemName.includes("\0")
       && item.issueDate
       && !Number.isNaN(new Date(item.issueDate).getTime())
       && item.requirement.length <= 5000
-      && item.reason.length <= 5000),
+      && !item.requirement.includes("\0")
+      && item.reason.length <= 5000
+      && !item.reason.includes("\0")),
   );
+}
+
+export const normalizeVehicleName = (value: string) => value.normalize("NFC").trim();
+export const countEoVehiclePairs = (items: DraftEoItem[]) => items.reduce((total, item) => total + item.vehicles.length, 0);
+export function hasDuplicateVehicles(vehicles: string[]) {
+  const names = vehicles.map(normalizeVehicleName).filter(Boolean);
+  return new Set(names).size !== names.length;
+}
+export function isValidVehicleName(value: string) {
+  return Boolean(value.trim() && value.length <= 255 && !/[\\/\u0000-\u001f]/.test(value) && ![".", ".."].includes(value.trim()));
 }

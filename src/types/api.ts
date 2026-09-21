@@ -59,12 +59,26 @@ export interface EoItem {
   reason: string | null;
   nas_search_root: string | null;
   nas_matches: Array<{ name: string; path: string; isDir: boolean }> | null;
+  carryover_sync_id?: string | null;
+  recipient_vehicles?: string[] | null;
+  nas_sources?: NasSource[] | null;
   discussion_status: DiscussionStatus;
   discussion_version: number;
   resolution_reason: string | null;
   resolved_by_id: string | null;
   resolved_at: string | null;
   discussion_updated_at: string;
+}
+
+export interface NasSource {
+  path: string;
+  name: string;
+  isDir: boolean;
+  root: string;
+  sourceCompany: string;
+  sourceVehicle: string;
+  partNo: string;
+  recipientVehicles: string[];
 }
 
 export interface Discussion {

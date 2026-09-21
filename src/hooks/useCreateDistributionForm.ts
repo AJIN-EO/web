@@ -54,6 +54,8 @@ function getRoutingIssues(error: unknown): DistributionRoutingIssue[] {
     Boolean(issue)
     && typeof issue === "object"
     && typeof (issue as DistributionRoutingIssue).itemIndex === "number"
+    && Number.isInteger((issue as DistributionRoutingIssue).vehicleIndex)
+    && (issue as DistributionRoutingIssue).vehicleIndex >= 0
     && typeof (issue as DistributionRoutingIssue).vehicle === "string"
     && typeof (issue as DistributionRoutingIssue).eoNo === "string"
     && typeof (issue as DistributionRoutingIssue).code === "string"

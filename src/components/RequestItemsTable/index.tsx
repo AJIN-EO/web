@@ -41,7 +41,9 @@ export default function RequestItemsTable({ items, expandedItemId, onToggleItem,
                   aria-expanded={isExpandable ? isExpanded : undefined}
                   title={isExpandable ? `클릭하여 ${isExpanded ? "의견 접기" : "의견 펼치기"}` : undefined}
                 >
-                  <td>{displayCellValue(item.vehicle)}</td>
+                  <td><div>{displayCellValue(item.vehicle)}</div>
+                    {item.recipient_vehicles?.length ? <small className={styles.inputVehicle}>NAS 차종: {item.recipient_vehicles.join(", ")}</small> : null}
+                  </td>
                   <td>{displayCellValue(item.eo_no)}</td>
                   <td>{displayCellValue(item.item_name)}</td>
                   <td>{formatIssueDate(item.issue_date, item.issue_date_precision)}</td>

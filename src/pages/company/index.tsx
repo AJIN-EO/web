@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import PageHeader from "../../components/PageHeader";
 import StatusBadge from "../../components/StatusBadge";
 import { useSession } from "../../hooks/useSession";
@@ -9,13 +9,15 @@ import styles from "../../styles/page.module.css";
 export default function CompanyPage() {
   const { user } = useSession();
   const isAdmin = user?.role === "admin";
-  const requestsQuery = useCompanyRequestsQuery();
+  const requestsQuery = useCompanyRequestsQuery(!isAdmin);
+
+  if (isAdmin) return <Navigate to="/admin/requests" replace />;
 
   return (
     <div>
       <PageHeader
-        title={isAdmin ? "보낸 EO 배포" : "받은 EO 배포"}
-        description={isAdmin ? "기업 사용자에게 보낸 EO 배포를 확인합니다." : "내 회사로 전달된 EO 배포를 확인하고 준비된 파일을 다운로드합니다."}
+        title="받은 EO 배포"
+        description="내 회사로 전달된 EO 배포를 확인하고 준비된 파일을 다운로드합니다."
         actions={<button className="button" type="button" onClick={() => requestsQuery.refetch()} disabled={requestsQuery.isFetching}>새로고침</button>}
       />
       <section className="panel">
