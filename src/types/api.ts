@@ -11,6 +11,7 @@ export interface SessionUser {
   displayName: string;
   role: UserRole;
   companyId: number | null;
+  mustChangePassword: boolean;
 }
 
 export interface Company {

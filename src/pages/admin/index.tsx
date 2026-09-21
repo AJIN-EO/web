@@ -11,7 +11,7 @@ import { DEFAULT_DISTRIBUTION_MESSAGE, DEFAULT_DISTRIBUTION_TITLE } from "../../
 import styles from "../../styles/page.module.css";
 import { getApiErrorStatus } from "../../api/client";
 import { routingIssueLabel } from "../../utils/distributionErrors";
-import type { DistributionNotification } from "../../api/distributions";
+import { notificationLabel } from "../../utils/notification";
 
 export default function AdminPage() {
   const { user } = useSession();
@@ -69,6 +69,14 @@ export default function AdminPage() {
                     <strong>{distribution.company.name} · {distribution.vehicle}</strong>
                     <p>EO {distribution.itemRefs.length}건 · {notificationLabel(distribution.notification)}</p>
                     <small>입력 위치: {distribution.itemRefs.map((ref) => `EO ${ref.itemIndex + 1} / 차종 ${ref.vehicleIndex + 1}`).join(", ")}</small>
+                    {distribution.notification.recipientResults?.length ? <details>
+                      <summary>담당자별 메일 결과 ({distribution.notification.recipientResults.length}명)</summary>
+                      {distribution.notification.recipientResults.map((recipient) => <div key={recipient.userId}>
+                        <p><strong>{recipient.email ?? `담당자 #${recipient.userId}`}</strong> · {notificationLabel(recipient)}</p>
+                        {recipient.credentialNotice ? <p>본인 임시 비밀번호 안내 포함 · 첫 로그인 후 비밀번호 설정 필요</p> : null}
+                        {recipient.error ? <p>{recipient.error}</p> : null}
+                      </div>)}
+                    </details> : null}
                   </div>
                   <Link to={`/admin/requests/${distribution.request.id}`}>상세 보기</Link>
                 </li>
@@ -105,15 +113,4 @@ export default function AdminPage() {
       </section>
     </div>
   );
-}
-
-function notificationLabel(notification: DistributionNotification) {
-  if (notification.trackingError) return "메일 발송 접수 · 발송 기록 저장 실패";
-  if (notification.status === "skipped" && notification.reason === "no_recipients") return "메일 생략 · 활성 수신 계정 없음";
-  if (notification.status === "skipped" && notification.reason === "email_disabled") return "메일 생략 · 발송 기능 꺼짐";
-  return {
-    sent: "메일 발송 접수",
-    failed: "메일 발송 실패",
-    skipped: "메일 발송 생략",
-  }[notification.status];
 }

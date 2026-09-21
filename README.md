@@ -28,6 +28,8 @@ VITE_API_BASE_URL=https://api.your-domain.com
 ## 사용자 흐름
 
 - `/login`: 쿠키 세션 로그인
+- `/change-password?next=...`: 최초 이용 시 필수 개인 비밀번호 설정 및 본인 비밀번호 변경
+- `/account/email`: 기업 사용자 본인 이메일 변경 신청·6자리 코드 인증
 - `/company`: 기업 사용자가 받은 EO 배포 목록 확인
 - `/company/requests/:publicId`: 메일 링크 진입, EO 내용 확인, 개별 EO 의견 작성·재활성화, S3 다운로드
 - `/admin`: 관리자/담당자가 EO 배포 생성 및 보낸 목록 확인
@@ -41,7 +43,10 @@ VITE_API_BASE_URL=https://api.your-domain.com
 
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
+- `POST /api/auth/change-password`
 - `GET /api/me`
+- `GET/POST /api/me/email-change`
+- `POST /api/me/email-change/confirm`
 - `GET /api/companies`
 - `GET/POST /api/admin/vehicle-companies`
 - `PATCH/DELETE /api/admin/vehicle-companies/:id` (`expectedVersion` 필수, DELETE도 JSON 본문 전송)
@@ -60,6 +65,21 @@ VITE_API_BASE_URL=https://api.your-domain.com
 
 API 호출은 Axios 기반의 `src/api`, React Query 선언은 `src/queries`, 실제 사용자 흐름과 상태 전환 로직은 `src/hooks`, 화면은 `src/pages`에 분리되어 있습니다. 공통 요청 설정과 응답·오류 처리는 `src/api/client.ts`의 Axios 인터셉터가 담당합니다.
 
+## 최초 이용과 본인 계정 변경
+
+서버 `docs/ACCOUNT_ACCESS.md`와 `docs/API_USAGE.md` 기준입니다. 첫 로그인에서 6자리 코드를 받는 절차는 없으며, 6자리 인증은 본인 이메일 변경에 사용합니다.
+
+1. 신규 기업 담당자는 첫 EO 메일의 개인별 임시 비밀번호로 로그인합니다. 로그인 및 `/api/me`의 `mustChangePassword: true`이면 EO·의견·다운로드 화면을 렌더링하기 전에 개인 비밀번호 설정으로 이동합니다. 원래 메일 링크의 경로·쿼리·해시를 보존하고, 새로고침·직접 URL 진입에도 적용합니다.
+2. 현재/새 비밀번호만 `POST /api/auth/change-password`로 보냅니다. 12~256자, 현재와 다른 값, 기본 비밀번호 패턴 금지와 확인값 일치를 검사합니다. 성공 응답의 새 쿠키와 사용자로 세션을 갱신하고 원래 EO로 돌아갑니다. 기존 계정은 강제 변경하지 않으며 상단 메뉴에서 자발적으로 변경할 수 있습니다.
+3. 기업 계정의 **이메일 변경**에서 새 주소와 현재 비밀번호로 코드를 요청합니다. 202는 메일 발송 접수입니다. GET으로 새로고침 시 인증 요청을 복원하고, 재발급 대기·만료·남은 시도를 표시합니다. 코드는 선행 0을 보존하는 6자리 문자열로 제출합니다.
+4. 재발급은 기존 코드를 무효화합니다. 400/409/410/429 오류 후 서버 상태를 다시 조회하며 POST를 자동 재전송하지 않습니다. `Retry-After`가 있으면 대기 시간을 반영합니다. 502나 통신 오류가 발생해도 GET으로 확인한 요청과 도착한 코드를 사용할 수 있습니다.
+5. 이메일 인증 확정 후에는 세션과 계정별 캐시를 비우고 로그인 화면에서 새 이메일을 안내합니다. **새 이메일 + 기존 비밀번호**로 재로그인합니다. 변경 후 첫 EO 메일을 준비할 때에만 서버가 임시 비밀번호를 발급하므로 이후 해당 메일의 안내를 따라 다시 개인 비밀번호를 설정합니다.
+6. 비밀번호·인증코드는 폼 메모리에서만 사용하며 URL·브라우저 저장소에 기록하지 않습니다. 서버의 403 `PASSWORD_CHANGE_REQUIRED`도 공통 처리하여 캐시된 세션 상태와 관계없이 필수 변경 화면으로 이동합니다.
+
+관리자 배포 결과는 `notification.status: partial`과 담당자별 `recipientResults`, 최초 안내 포함 여부 및 발송 기록 저장 실패를 표시합니다. 비밀번호 값은 API로 받거나 표시하지 않습니다. 일부 메일 실패 때문에 EO를 다시 생성하면 중복 배포됩니다.
+
+검증할 때는 최초 이용 계정의 메일 링크 → 비밀번호 설정 → 원래 EO 복귀, 기존 계정의 정상 진입, 이메일 인증 재발급/만료/오입력/전송 불명확/확정 후 재로그인을 확인하세요. 실제 서버의 신규 API 배포와 SES 수신 제한은 별도로 확인해야 합니다.
+
 ## 차종 설정과 다중 차종 EO 확인 순서
 
 1. 관리자의 **차종 설정 → 차종별 수신 기업**에서 EO에 사용할 입력 차종명과 수신 기업을 등록합니다. 초기 설정은 비어 있으며 NAS 폴더나 별칭으로 자동 생성하지 않습니다. 비활성 기업 설정도 목록에 남지만 배포할 수 없습니다.
@@ -76,4 +96,4 @@ API 호출은 Axios 기반의 `src/api`, React Query 선언은 `src/queries`, �
 
 서버의 `docs/API_USAGE.md`, `docs/CARRYOVER.md`, `docs/VEHICLE_ROUTING.md`, `docs/VEHICLE_COMPANIES.md`, `docs/EO_DISCUSSIONS.md`, NAS 테스트·배포 문서와 README를 확인한 기준입니다. 실제 NAS 파일 수정, 기업/계정 등록과 서버 배포는 해당 운영 절차를 따릅니다.
 
-`npm test`는 Node 22.18 이상에서 다중 차종 입력·100쌍 제한·중복 정규화·오류 처리를 확인합니다. `npm run build`는 타입 검사와 프로덕션 빌드를 수행합니다.
+`npm test`는 Node 22.18 이상에서 다중 차종 입력·100쌍 제한·중복 정규화·오류 처리, 인증 복귀 경로·비밀번호 규칙·Retry-After·메일 부분 실패 표시를 확인합니다. `npm run build`는 타입 검사와 프로덕션 빌드를 수행합니다.

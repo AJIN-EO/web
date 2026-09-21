@@ -4,17 +4,21 @@ import { getApiErrorStatus } from "../api/client";
 import { useSession } from "../hooks/useSession";
 import type { UserRole } from "../types/api";
 import { errorMessage } from "../utils/format";
+import { passwordChangePath, safeNextPath } from "../utils/account";
 
-export function RequireSession({ children }: { children: ReactNode }) {
+export function RequireSession({ children, allowPasswordChange = false }: { children: ReactNode; allowPasswordChange?: boolean }) {
   const location = useLocation();
   const { user, isLoading, error } = useSession();
 
   if (isLoading) return <div className="page-state">세션 확인 중...</div>;
   if (!user && (!error || getApiErrorStatus(error) === 401)) {
-    const next = `${location.pathname}${location.search}`;
+    const next = allowPasswordChange ? safeNextPath(new URLSearchParams(location.search).get("next")) ?? "/" : `${location.pathname}${location.search}${location.hash}`;
     return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
   if (error) return <div className="alert alert--error">서버에 연결하지 못했습니다: {errorMessage(error)}</div>;
+  if (user?.mustChangePassword && !allowPasswordChange) {
+    return <Navigate to={passwordChangePath(`${location.pathname}${location.search}${location.hash}`)} replace />;
+  }
   return children;
 }
 

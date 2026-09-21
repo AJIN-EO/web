@@ -1,0 +1,6 @@
+.page { max-width: 720px; margin: 0 auto; }
+.form { display: grid; gap: 1rem; }
+.form p { margin: 0; color: var(--color-text-muted); font-size: 0.9rem; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.header h2 { margin: 0; }
+.email { overflow-wrap: anywhere; }

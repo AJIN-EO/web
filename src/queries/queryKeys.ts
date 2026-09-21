@@ -1,5 +1,6 @@
 export const queryKeys = {
   session: ["session"] as const,
+  loginNotice: ["session", "login-notice"] as const,
   vehicleSettings: ["admin", "vehicle-settings"] as const,
   vehicleCompanies: ["admin", "vehicle-settings", "companies"] as const,
   vehicleAliases: ["admin", "vehicle-settings", "aliases"] as const,

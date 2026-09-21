@@ -17,14 +17,29 @@ export interface CreateDistributionInput {
 }
 
 export type DistributionNotification = {
-  status: "sent" | "failed" | "skipped";
+  status: "sent" | "partial" | "failed" | "skipped";
   messageId?: string;
+  messageIds?: string[];
+  recipientResults?: RecipientNotification[];
   stage?: string;
   errorCode?: string;
   error?: string;
   reason?: "email_disabled" | "no_recipients";
   trackingError?: boolean;
 };
+
+export interface RecipientNotification {
+  userId: string;
+  email?: string;
+  status: "sent" | "failed" | "skipped";
+  messageId?: string;
+  credentialNotice?: boolean;
+  trackingError?: boolean;
+  reason?: "recipient_inactive";
+  stage?: string;
+  errorCode?: string;
+  error?: string;
+}
 
 export interface RoutedDistribution {
   company: {

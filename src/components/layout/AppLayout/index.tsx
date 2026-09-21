@@ -1,15 +1,16 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { passwordChangePath } from "../../../utils/account";
 import { useSession } from "../../../hooks/useSession";
 import styles from "./style.module.css";
 
 export default function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout, isLoggingOut } = useSession();
   const isAdmin = user?.role === "admin";
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login", { replace: true });
+    try { await logout(); } finally { navigate("/login", { replace: true }); }
   };
 
   return (
@@ -22,6 +23,8 @@ export default function AppLayout() {
         </nav>
         <div className={styles.account}>
           <span><strong>{user?.displayName}</strong> · {user?.email}</span>
+          <NavLink to={passwordChangePath(`${location.pathname}${location.search}${location.hash}`)}>비밀번호 변경</NavLink>
+          {!isAdmin ? <NavLink to="/account/email">이메일 변경</NavLink> : null}
           <button type="button" className="button" onClick={handleLogout} disabled={isLoggingOut}>로그아웃</button>
         </div>
       </header>

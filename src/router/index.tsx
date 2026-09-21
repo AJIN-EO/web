@@ -7,16 +7,20 @@ import VehicleSettingsPage from "../pages/admin/vehicles";
 import CompanyPage from "../pages/company";
 import CompanyRequestDetailPage from "../pages/company/detail";
 import LoginPage from "../pages/login";
+import ChangePasswordPage from "../pages/account/change-password";
+import EmailChangePage from "../pages/account/email";
 import NotFoundPage from "../pages/not-found";
 import { LandingRedirect, RequireRole, RequireSession } from "./guards";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <LoginPage /> },
+  { path: "/change-password", element: <RequireSession allowPasswordChange><ChangePasswordPage /></RequireSession> },
   {
     path: "/",
     element: <RequireSession><AppLayout /></RequireSession>,
     children: [
       { index: true, element: <LandingRedirect /> },
+      { path: "account/email", element: <RequireRole roles={["company"]}><EmailChangePage /></RequireRole> },
       { path: "company", element: <CompanyPage /> },
       { path: "company/requests/:publicId", element: <CompanyRequestDetailPage /> },
       { path: "admin", element: <RequireRole roles={["admin"]}><AdminPage /></RequireRole> },

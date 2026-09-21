@@ -1,16 +1,22 @@
 import axios, { type AxiosRequestConfig } from "axios";
+import { parseRetryAfter } from "../utils/account";
 
 export const AUTH_UNAUTHORIZED_EVENT = "auth:unauthorized";
+export const PASSWORD_CHANGE_REQUIRED_EVENT = "auth:password-change-required";
 
 export class ApiError extends Error {
   readonly status: number;
   readonly data: unknown;
+  readonly code?: string;
+  readonly retryAfterSeconds: number | null;
 
-  constructor(message: string, status: number, data: unknown) {
+  constructor(message: string, status: number, data: unknown, retryAfterSeconds: number | null = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.data = data;
+    this.code = typeof data === "object" && data !== null && "code" in data && typeof data.code === "string" ? data.code : undefined;
+    this.retryAfterSeconds = retryAfterSeconds;
   }
 }
 
@@ -44,16 +50,19 @@ apiClient.interceptors.response.use(
     if (!axios.isAxiosError(error)) return Promise.reject(error);
 
     const status = error.response?.status ?? 0;
-    const data = error.response?.data ?? error;
+    const data = error.response?.data ?? null;
     const serverMessage = getServerErrorMessage(error.response?.data);
     const message = serverMessage
       ?? (status === 0
         ? "API 서버에 연결할 수 없습니다. API 주소와 HTTPS 설정을 확인해 주세요."
         : `요청에 실패했습니다. (${status})`);
 
-    const apiError = new ApiError(message, status, data);
+    const apiError = new ApiError(message, status, data, parseRetryAfter(error.response?.headers["retry-after"]));
     if (status === 401 && typeof window !== "undefined") {
       window.dispatchEvent(new Event(AUTH_UNAUTHORIZED_EVENT));
+    }
+    if (status === 403 && apiError.code === "PASSWORD_CHANGE_REQUIRED" && typeof window !== "undefined") {
+      window.dispatchEvent(new Event(PASSWORD_CHANGE_REQUIRED_EVENT));
     }
 
     return Promise.reject(apiError);
